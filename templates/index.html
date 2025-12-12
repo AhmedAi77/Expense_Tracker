@@ -1,0 +1,222 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="d-flex align-items-center">
+            <h1 class="text-white mb-0">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </h1>
+            <p class="text-white fs-2 mb-0 ms-auto me-auto">
+                <i class="bi bi-person-circle"></i> Welcome, <strong>{{ username }}</strong>!
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Total Spending Card -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="stat-card text-center">
+            <h5 class="text-muted">This Month's Spending</h5>
+            <div class="stat-value">{{ symbol }}{{ "%.2f"|format(total) }}</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card text-center">
+            <h5 class="text-muted">Total Expenses</h5>
+            <div class="stat-value">{{ expenses|length }}</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card text-center">
+            <h5 class="text-muted">Categories</h5>
+            <div class="stat-value">{{ categories|length }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Add Expense Form -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-4">
+                    <i class="bi bi-plus-circle"></i> Add New Expense
+                </h5>
+                <form action="/add_expense" method="post">
+                    <div class="mb-3">
+                        <label for="category_id" class="form-label">Category</label>
+                        <select class="form-select" id="category_id" name="category_id" required>
+                            <option value=""disabled selected>Choose category...</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">Amount ({{ symbol }})</label>
+                        <input type="number" class="form-control" id="amount" name="amount" 
+                               step="0.01" min="0.01" placeholder="0.00" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <input type="text" class="form-control" id="description" name="description" 
+                               placeholder="What did you spend on?">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="date" name="date" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-check-lg"></i> Add Expense
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart and Expenses List -->
+    <div class="col-md-8">
+        <!-- Spending Chart -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-4">
+                    <i class="bi bi-bar-chart"></i> Spending by Category
+                </h5>
+                
+                {% if category_totals %}
+                    <canvas id="spendingChart"></canvas>
+                {% else %}
+                    <div class="text-center text-muted py-5">
+                        <i class="bi bi-pie-chart" style="font-size: 3rem;"></i>
+                        <p class="mt-3">No spending data yet. Add expenses to see the chart!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Expenses -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-4">
+                    <i class="bi bi-clock-history"></i> Recent Expenses
+                </h5>
+                
+                {% if expenses %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Category</th>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for expense in expenses %}
+                                <tr>
+                                    <td>{{ expense.date }}</td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ expense.category_name }}</span>
+                                    </td>
+                                    <td>{{ expense.description or '-' }}</td>
+                                    <td class="fw-bold">{{ symbol }}{{ "%.2f"|format(expense.amount) }}</td>
+                                    <td>
+                                        <a href="/delete_expense/{{ expense.id }}" 
+                                           class="btn btn-sm btn-danger"
+                                           onclick="return confirm('Delete this expense?')">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-5">
+                        <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                        <p class="mt-3">No expenses yet. Add your first expense!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Set today's date as default
+    document.getElementById('date').valueAsDate = new Date();
+
+    {% if category_totals %}
+    // Chart.js configuration - only run if there's data
+    const ctx = document.getElementById('spendingChart').getContext('2d');
+    
+    const categoryNames = [
+        {% for cat in category_totals %}
+            "{{ cat.name }}"{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+    
+    const categoryAmounts = [
+        {% for cat in category_totals %}
+            {{ cat.total }}{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: categoryNames,
+            datasets: [{
+                label: 'Spending ({{ symbol }})',
+                data: categoryAmounts,
+                backgroundColor: [
+                    'rgba(102, 126, 234, 0.8)',
+                    'rgba(118, 75, 162, 0.8)',
+                    'rgba(237, 100, 166, 0.8)',
+                    'rgba(255, 154, 158, 0.8)',
+                    'rgba(250, 208, 196, 0.8)',
+                    'rgba(156, 136, 255, 0.8)'
+                ],
+                borderWidth: 0,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        display: false
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+    {% endif %}
+</script>
+{% endblock %}
