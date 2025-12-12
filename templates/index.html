@@ -46,19 +46,11 @@
                 <h5 class="card-title mb-4">
                     <i class="bi bi-plus-circle"></i> Add New Expense
                 </h5>
-<<<<<<< HEAD
-                <form action="/add_expense" method="post">
-                    <div class="mb-3">
-                        <label for="category_id" class="form-label">Category</label>
-                        <select class="form-select" id="category_id" name="category_id" required>
-                            <option value=""disabled selected>Choose category...</option>
-=======
                 <form action="/add_expense" method="post" id="expenseForm">
                     <div class="mb-3">
                         <label for="category_id" class="form-label">Category</label>
                         <select class="form-select" id="category_id" name="category_id" required>
                             <option value="" disabled selected>Choose category...</option>
->>>>>>> e46a841 (Fix: category aggregation, chart data types, add debug endpoint, restore date behavior)
                             {% for category in categories %}
                                 <option value="{{ category.id }}">{{ category.name }}</option>
                             {% endfor %}
@@ -79,18 +71,14 @@
 
                     <div class="mb-3">
                         <label for="date" class="form-label">Date</label>
-<<<<<<< HEAD
-                        <input type="date" class="form-control" id="date" name="date" required>
-                    </div>
-
-=======
                         <input type="date" class="form-control" id="date" name="date" 
                                value="{{ today_date }}" required>
                     </div>
 
-                    
-
->>>>>>> e46a841 (Fix: category aggregation, chart data types, add debug endpoint, restore date behavior)
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="exclude" name="exclude">
+                        <label class="form-check-label" for="exclude">Exclude from reports (chart and totals)</label>
+                    </div>
                     <button type="submit" class="btn btn-primary w-100">
                         <i class="bi bi-check-lg"></i> Add Expense
                     </button>
@@ -125,10 +113,7 @@
                 <h5 class="card-title mb-4">
                     <i class="bi bi-clock-history"></i> Recent Expenses
                 </h5>
-<<<<<<< HEAD
-=======
                 <p class="text-muted small mb-2">Showing your most recent expenses (past-dated entries are visible here). The chart and total above reflect only the current month.</p>
->>>>>>> e46a841 (Fix: category aggregation, chart data types, add debug endpoint, restore date behavior)
                 
                 {% if expenses %}
                     <div class="table-responsive">
@@ -148,18 +133,14 @@
                                     <td>{{ expense.date }}</td>
                                     <td>
                                         <span class="badge bg-primary">{{ expense.category_name }}</span>
+                                        {% if expense.exclude_from_reports and expense.exclude_from_reports != 0 %}
+                                        <span class="badge bg-secondary ms-1">Excluded</span>
+                                        {% endif %}
                                     </td>
                                     <td>{{ expense.description or '-' }}</td>
                                     <td class="fw-bold">{{ symbol }}{{ "%.2f"|format(expense.amount) }}</td>
                                     <td>
-                                        <a href="/delete_expense/{{ expense.id }}" 
-<<<<<<< HEAD
-                                           class="btn btn-sm btn-danger"
-                                           onclick="return confirm('Delete this expense?')">
-=======
-                                                class="btn btn-sm btn-danger"
-                                                onclick="return confirm('Delete this expense?')">
->>>>>>> e46a841 (Fix: category aggregation, chart data types, add debug endpoint, restore date behavior)
+                                        <a href="/delete_expense/{{ expense.id }}" class="btn btn-sm btn-danger" onclick="return confirm('Delete this expense?')">
                                             <i class="bi bi-trash"></i>
                                         </a>
                                     </td>
@@ -182,10 +163,6 @@
 
 {% block scripts %}
 <script>
-<<<<<<< HEAD
-    // Set today's date as default
-    document.getElementById('date').valueAsDate = new Date();
-=======
     // Debug: Log form submission
     document.getElementById('expenseForm').addEventListener('submit', function(e) {
         const dateValue = document.getElementById('date').value;
@@ -198,31 +175,15 @@
             return false;
         }
     });
->>>>>>> e46a841 (Fix: category aggregation, chart data types, add debug endpoint, restore date behavior)
 
     {% if category_totals %}
     // Chart.js configuration - only run if there's data
     const ctx = document.getElementById('spendingChart').getContext('2d');
     
-<<<<<<< HEAD
-    const categoryNames = [
-        {% for cat in category_totals %}
-            "{{ cat.name }}"{% if not loop.last %},{% endif %}
-        {% endfor %}
-    ];
-    
-    const categoryAmounts = [
-        {% for cat in category_totals %}
-            {{ cat.total }}{% if not loop.last %},{% endif %}
-        {% endfor %}
-    ];
-
-=======
     const categoryNames = {{ category_names|tojson | safe }};
     const categoryAmounts = {{ category_amounts|tojson | safe }};
 
     console.log('DEBUG - categoryNames:', categoryNames, 'categoryAmounts:', categoryAmounts);
->>>>>>> e46a841 (Fix: category aggregation, chart data types, add debug endpoint, restore date behavior)
     const chart = new Chart(ctx, {
         type: 'bar',
         data: {
