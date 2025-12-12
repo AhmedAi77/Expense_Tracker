@@ -14,11 +14,7 @@ A modern, user-friendly web application for tracking personal expenses. Built wi
 - **Session Management**: Secure server-side sessions using Flask-Session
 - **Data Visualization**: Real-time spending breakdown by category
 
-## 🎥 Demo
 
-Watch the project demonstration video:
-
-**Video URL**: https://youtu.be/WVbjMsUpa4w
 
 ## 🛠 Technologies Used
 
@@ -173,3 +169,4 @@ Ahmed Waleed
 ---
 
 **Note**: This project was developed as part of the CS50 Introduction to Computer Science course final project requirements.
+
