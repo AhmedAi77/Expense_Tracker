@@ -51,6 +51,12 @@ def init_db():
     conn.commit()
     conn.close()
 
+
+@app.before_request
+def ensure_db():
+    # Ensure the database tables exist before handling requests
+    init_db()
+
 # Login required decorator
 def login_required(f):
     @wraps(f)

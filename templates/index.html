@@ -220,15 +220,4 @@
     });
     {% endif %}
 </script>
-        // Debug: Log form submission
-        document.getElementById('expenseForm').addEventListener('submit', function(e) {
-            const dateValue = document.getElementById('date').value;
-            console.log('Submitting form with date:', dateValue);
-            
-            if (!dateValue) {
-                console.error('ERROR: Date field is empty!');
-                alert('Please select a date');
-                e.preventDefault();
-                return false;
-            }
-        });
+{% endblock %}
