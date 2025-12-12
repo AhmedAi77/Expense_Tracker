@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+
+# Packages
+venv/
+.env
+
+# Database
+expenses.db
+
+# Flask session files
+flask_session/
+
+# OS files
+.DS_Store
+
