@@ -51,6 +51,14 @@ def init_db():
     conn.commit()
     conn.close()
 
+    # Safe migration: add exclude_from_reports column if missing
+    conn = get_db()
+    cols = [r['name'] for r in conn.execute("PRAGMA table_info('expenses')").fetchall()]
+    if 'exclude_from_reports' not in cols:
+        conn.execute('ALTER TABLE expenses ADD COLUMN exclude_from_reports INTEGER DEFAULT 0')
+        conn.commit()
+    conn.close()
+
 
 @app.before_request
 def ensure_db():
@@ -98,6 +106,7 @@ def index():
         FROM expenses e
         JOIN categories c ON e.category_id = c.id
         WHERE e.user_id = ? AND e.date LIKE ?
+            AND (e.exclude_from_reports IS NULL OR e.exclude_from_reports = 0)
         ORDER BY e.date DESC
     ''', (session["user_id"], f"{current_month}%")).fetchall()
 
@@ -110,6 +119,7 @@ def index():
         FROM expenses e
         JOIN categories c ON e.category_id = c.id
         WHERE e.user_id = ? AND e.date LIKE ?
+            AND (e.exclude_from_reports IS NULL OR e.exclude_from_reports = 0)
         GROUP BY e.category_id
     ''', (session["user_id"], f"{current_month}%")).fetchall()
 
@@ -310,9 +320,11 @@ def add_expense():
     
     # Add expense
     conn = get_db()
+    exclude_flag = request.form.get('exclude')
+    exclude_int = 1 if exclude_flag else 0
     conn.execute(
-        "INSERT INTO expenses (user_id, category_id, amount, description, date) VALUES (?, ?, ?, ?, ?)",
-        (session["user_id"], category_id, amount, description, date)
+        "INSERT INTO expenses (user_id, category_id, amount, description, date, exclude_from_reports) VALUES (?, ?, ?, ?, ?, ?)",
+        (session["user_id"], category_id, amount, description, date, exclude_int)
     )
     conn.commit()
     conn.close()

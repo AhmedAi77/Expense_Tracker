@@ -74,6 +74,11 @@
                         <input type="date" class="form-control" id="date" name="date" 
                                value="{{ today_date }}" required>
                     </div>
+
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="exclude" name="exclude">
+                        <label class="form-check-label" for="exclude">Exclude from reports (chart and totals)</label>
+                    </div>
                     <button type="submit" class="btn btn-primary w-100">
                         <i class="bi bi-check-lg"></i> Add Expense
                     </button>
@@ -128,6 +133,9 @@
                                     <td>{{ expense.date }}</td>
                                     <td>
                                         <span class="badge bg-primary">{{ expense.category_name }}</span>
+                                        {% if expense.exclude_from_reports and expense.exclude_from_reports != 0 %}
+                                        <span class="badge bg-secondary ms-1">Excluded</span>
+                                        {% endif %}
                                     </td>
                                     <td>{{ expense.description or '-' }}</td>
                                     <td class="fw-bold">{{ symbol }}{{ "%.2f"|format(expense.amount) }}</td>
