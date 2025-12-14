@@ -163,10 +163,10 @@ This project is open source and available under the [MIT License](LICENSE).
 ## 👤 Author
 
 Ahmed Waleed
-- CS50 Final Project
-- Harvard University
+
 
 ---
 
 **Note**: This project was developed as part of the CS50 Introduction to Computer Science course final project requirements.
+
 
