@@ -12,7 +12,7 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "change-this-in-production")
 
-DATABASE_URL = os.environ.get("DATABASE_URL")
+DATABASE_URL = os.environ.get("DATABASE_URL", "").replace("channel_binding=require", "").replace("&&", "&").strip("&?")
 
 def get_db():
     conn = psycopg2.connect(DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor)
@@ -50,8 +50,17 @@ def init_db():
     cur.close()
     conn.close()
 
-if DATABASE_URL:
-    init_db()
+_db_initialized = False
+
+def ensure_db():
+    global _db_initialized
+    if not _db_initialized and DATABASE_URL:
+        init_db()
+        _db_initialized = True
+
+@app.before_request
+def before_request():
+    ensure_db()
 
 def login_required(f):
     @wraps(f)
