@@ -28,7 +28,7 @@
       </div>
       <div class="mb-2">
         <label for="date" class="form-label">Date</label>
-        <input type="date" name="date" id="date" class="form-control" value="{{ datetime.utcnow().date() }}">
+        <input type="date" name="date" id="date" class="form-control" value="{{ today }}">
       </div>
       <button type="submit" class="btn btn-primary">Add Expense</button>
     </form>
@@ -64,7 +64,7 @@
   <canvas id="categoryChart" width="400" height="200"></canvas>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/static/js/chart.min.js"></script>
 <script>
 var ctx = document.getElementById('categoryChart').getContext('2d');
 var chart = new Chart(ctx, {
